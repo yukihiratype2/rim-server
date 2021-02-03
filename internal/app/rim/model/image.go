@@ -4,10 +4,10 @@ import "gorm.io/gorm"
 
 // Image Struct
 type Image struct {
-	gorm.Model
+	// gorm.Model
 	Name   string `json:"name"`
 	FileID string
-	Tags   []*Tag `gorm:"many2many:image_tags;"`
+	// Tags   []*Tag `gorm:"many2many:image_tags;"`
 }
 
 // Tag Struct

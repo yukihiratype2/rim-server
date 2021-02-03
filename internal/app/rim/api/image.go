@@ -1,14 +1,9 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"rim-server/internal/app/rim/model"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func (s *Server) queryImages(w http.ResponseWriter, req *http.Request) {
@@ -31,8 +26,8 @@ func (s *Server) addImage(w http.ResponseWriter, req *http.Request) {
 
 	s.model.DB.Create(image)
 	res, err := json.Marshal(image)
-	presignedURL, err := s.s3.PresignedPutObject(context.Background(), "test-img", uuid.New().String(), time.Second*24*60*60)
-	fmt.Println(presignedURL)
+	// presignedURL, err := s.s3.PresignedPutObject(context.Background(), "test-img", uuid.New().String(), time.Second*24*60*60)
+	// fmt.Println(presignedURL)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
