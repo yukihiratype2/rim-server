@@ -9,7 +9,7 @@ import (
 func (s *Server) queryTags(w http.ResponseWriter, req *http.Request) {
 	var tag []model.Tag
 
-	s.model.DB.Find(&tag)
+	s.model.DB.Preload("Images").Find(&tag)
 
 	result, err := json.Marshal(tag)
 	if err != nil {
@@ -24,7 +24,7 @@ func (s *Server) addTag(w http.ResponseWriter, req *http.Request) {
 
 	err := json.NewDecoder(req.Body).Decode(&tag)
 
-	s.model.DB.Create(tag)
+	s.model.DB.Create(&tag)
 	res, err := json.Marshal(tag)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
