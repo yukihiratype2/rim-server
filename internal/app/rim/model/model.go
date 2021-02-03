@@ -14,7 +14,7 @@ func NewModel() (model *Model, err error) {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&Image{})
+	db.AutoMigrate(&Image{}, &Tag{})
 	model = &Model{db}
 	return model, err
 }
