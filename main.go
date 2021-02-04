@@ -2,6 +2,7 @@ package main
 
 import (
 	"rim-server/internal/app/rim/api"
+	"rim-server/internal/app/rim/imageservice"
 	"rim-server/internal/app/rim/model"
 
 	"github.com/minio/minio-go/v7"
@@ -22,5 +23,8 @@ func main() {
 		panic(err)
 	}
 	server := api.New(model, minioClient)
+
+	is := imageservice.NewImageService(minioClient)
+	is.Start()
 	server.Start()
 }

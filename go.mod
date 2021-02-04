@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/google/uuid v1.2.0
+	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/minio/md5-simd v1.1.1 // indirect
 	github.com/minio/minio-go/v7 v7.0.7

@@ -6,7 +6,8 @@ import "gorm.io/gorm"
 type Image struct {
 	gorm.Model
 	Name   string `json:"name"`
-	FileID string
+	FileID string `json:"fileId"`
+	URL    string `gorm:"-" json:"url"`
 	Tags   []*Tag `gorm:"many2many:image_tags;" json:"tag"`
 }
 
