@@ -48,9 +48,11 @@ type uploadURL struct {
 func (s *Server) addImage(w http.ResponseWriter, req *http.Request) {
 	setupResponse(&w, req)
 	var image model.Image
+	err := json.NewDecoder(req.Body).Decode(&image)
 	image.FileID = uuid.New().String() + ".jpg"
 	s.model.DB.Create(&image)
-	presignedURL, err := s.s3.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*24*60*60)
+
+	presignedURL, err := s.s3.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
 	var url uploadURL
 	url.URL = presignedURL.String()
 	res, err := json.Marshal(url)

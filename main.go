@@ -25,6 +25,6 @@ func main() {
 	server := api.New(model, minioClient)
 
 	is := imageservice.NewImageService(minioClient)
-	is.Start()
+	go is.Start()
 	server.Start()
 }
