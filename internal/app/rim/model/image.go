@@ -11,11 +11,14 @@ type Image struct {
 	Tags   []*Tag `gorm:"many2many:image_tags;" json:"tag"`
 }
 
-// Tag Struct
-type Tag struct {
-	ID     uint     `gorm:"primarykey" json:"id"`
-	Label  string   `json:"label"`
-	Color  string   `json:"color"`
-	Images []*Image `gorm:"many2many:image_tags;" json:"images"`
-	// gorm.Model
+func (i *Image) Create() (err error) {
+	return db.Create(i).Error
+}
+
+func (i *Image) First() (err error) {
+	return db.Preload("Tags").First(i).Error
+}
+
+func Find(images *[]Image) (err error) {
+	return db.Preload("Tags").Find(images).Error
 }

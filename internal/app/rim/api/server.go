@@ -2,9 +2,8 @@ package api
 
 import (
 	"net/http"
-	"rim-server/internal/app/rim/model"
 
-	"github.com/minio/minio-go/v7"
+	"github.com/gin-gonic/gin"
 )
 
 func setupResponse(w *http.ResponseWriter, req *http.Request) {
@@ -13,17 +12,10 @@ func setupResponse(w *http.ResponseWriter, req *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
 
-type Server struct {
-	model *model.Model
-	s3    *minio.Client
-}
+var r *gin.Engine
 
-func New(model *model.Model, s3 *minio.Client) *Server {
-	server := &Server{model, s3}
-	return server
-}
-
-func (s *Server) Start() {
-	s.setupRouter()
-	http.ListenAndServe(":8080", nil)
+func Start() {
+	r = gin.Default()
+	setupRouter()
+	r.Run(":8080")
 }

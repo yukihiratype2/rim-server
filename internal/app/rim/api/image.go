@@ -2,63 +2,60 @@ package api
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
 	"net/url"
+	"rim-server/internal/app/rim/imageservice"
 	"rim-server/internal/app/rim/model"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-func (s *Server) queryImages(w http.ResponseWriter, req *http.Request) {
-	var image []model.Image
-
-	s.model.DB.Preload("Tags").Find(&image)
-
-	result, err := json.Marshal(image)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(result)
+func imageRoute() {
+	r.GET("/image", queryImages)
+	r.GET("/image/:id", getImage)
+	r.PUT("image", addImage)
 }
 
-func (s *Server) getImage(w http.ResponseWriter, req *http.Request, id string) {
-	setupResponse(&w, req)
+func queryImages(c *gin.Context) {
+	var images []model.Image
+
+	model.Find(&images)
+
+	c.JSON(200, images)
+}
+
+func getImage(c *gin.Context) {
 	var image model.Image
-	ID, err := strconv.ParseUint(id, 10, 8)
+	ID, err := strconv.ParseUint(c.Param("id"), 10, 8)
 	image.ID = uint(ID)
-	s.model.DB.Preload("Tags").First(&image)
-	presignedURL, err := s.s3.PresignedGetObject(context.Background(), "test-img", image.FileID, time.Second*24*60*60, url.Values{})
+	image.First()
+	presignedURL, err := imageservice.S3.PresignedGetObject(context.Background(), "test-img", image.FileID, time.Second*24*60*60, url.Values{})
 	image.URL = presignedURL.String()
-	result, err := json.Marshal(image)
+
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.Err()
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(result)
+
+	c.JSON(200, image)
 }
 
 type uploadURL struct {
 	URL string `json:"url"`
 }
 
-func (s *Server) addImage(w http.ResponseWriter, req *http.Request) {
-	setupResponse(&w, req)
+func addImage(c *gin.Context) {
 	var image model.Image
-	err := json.NewDecoder(req.Body).Decode(&image)
+	c.ShouldBindJSON(&image)
 	image.FileID = uuid.New().String() + ".jpg"
-	s.model.DB.Create(&image)
+	image.Create()
 
-	presignedURL, err := s.s3.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
+	presignedURL, err := imageservice.S3.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
 	var url uploadURL
 	url.URL = presignedURL.String()
-	res, err := json.Marshal(url)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.Err()
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
+	c.JSON(200, url)
 }
