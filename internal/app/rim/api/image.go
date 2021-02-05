@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"net/url"
-	"rim-server/internal/app/rim/imageservice"
 	"rim-server/internal/app/rim/model"
+	"rim-server/internal/app/rim/s3"
 	"strconv"
 	"time"
 
@@ -15,6 +15,7 @@ import (
 func imageRoute() {
 	r.GET("/image", queryImages)
 	r.GET("/image/:id", getImage)
+	// r.GET("/image/process/:fileId", waitForImageProcessed)
 	r.PUT("image", addImage)
 }
 
@@ -31,7 +32,7 @@ func getImage(c *gin.Context) {
 	ID, err := strconv.ParseUint(c.Param("id"), 10, 8)
 	image.ID = uint(ID)
 	image.First()
-	presignedURL, err := imageservice.S3.PresignedGetObject(context.Background(), "test-img", image.FileID, time.Second*24*60*60, url.Values{})
+	presignedURL, err := s3.Client.PresignedGetObject(context.Background(), "test-img", image.FileID, time.Second*24*60*60, url.Values{})
 	image.URL = presignedURL.String()
 
 	if err != nil {
@@ -41,21 +42,33 @@ func getImage(c *gin.Context) {
 	c.JSON(200, image)
 }
 
-type uploadURL struct {
-	URL string `json:"url"`
+type addImageParam struct {
+	model.Image
+	Immediate bool `json:"immediate" gorm:"-"`
+}
+
+type addImageResponse struct {
+	model.Image
+	UploadURL string `json:"uploadUrl" gorm:"-"`
 }
 
 func addImage(c *gin.Context) {
-	var image model.Image
+	var image addImageParam
 	c.ShouldBindJSON(&image)
 	image.FileID = uuid.New().String() + ".jpg"
 	image.Create()
+	var respImage addImageResponse
+	respImage.ID = image.ID
+	respImage.FileID = image.FileID
 
-	presignedURL, err := imageservice.S3.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
-	var url uploadURL
-	url.URL = presignedURL.String()
+	presignedURL, err := s3.Client.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
+	respImage.UploadURL = presignedURL.String()
 	if err != nil {
 		c.Err()
 	}
-	c.JSON(200, url)
+	c.JSON(200, respImage)
+}
+
+func waitForImageProcessed(c *gin.Context) {
+	// fileId, err := strconv.ParseUint(c.Param("fileId"), 10, 8)
 }
