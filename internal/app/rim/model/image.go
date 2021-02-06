@@ -7,7 +7,7 @@ type Image struct {
 	gorm.Model
 	Name   string `json:"name" form:"name"`
 	FileID string `json:"fileId"`
-	// Folder Folder `json:"folder"`
+	// Folder   Folder `json:"folder"`
 	Favorite bool   `json:"favorite" form:"favorite"`
 	URL      string `gorm:"-" json:"url"`
 	Tags     []*Tag `gorm:"many2many:image_tags;" json:"tag"`

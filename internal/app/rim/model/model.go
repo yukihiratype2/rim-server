@@ -12,5 +12,5 @@ func Connect() (err error) {
 	if err != nil {
 		panic(err)
 	}
-	return db.AutoMigrate(&Image{}, &Tag{})
+	return db.AutoMigrate(&Image{}, &Tag{}, &Folder{})
 }
