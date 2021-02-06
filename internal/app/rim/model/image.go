@@ -7,8 +7,10 @@ type Image struct {
 	gorm.Model
 	Name   string `json:"name"`
 	FileID string `json:"fileId"`
-	URL    string `gorm:"-" json:"url"`
-	Tags   []*Tag `gorm:"many2many:image_tags;" json:"tag"`
+	// Folder Folder `json:"folder"`
+	Favorite bool   `json:"favorite"`
+	URL      string `gorm:"-" json:"url"`
+	Tags     []*Tag `gorm:"many2many:image_tags;" json:"tag"`
 }
 
 func (i *Image) Create() (err error) {
@@ -21,4 +23,8 @@ func (i *Image) First() (err error) {
 
 func Find(images *[]Image) (err error) {
 	return db.Preload("Tags").Find(images).Error
+}
+
+func (i *Image) Update() (err error) {
+	return db.Save(i).Error
 }
