@@ -2,11 +2,13 @@ package imageservice
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"io"
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
 	"rim-server/internal/app/rim/s3"
+	"time"
 
 	"github.com/disintegration/imaging"
 	"github.com/minio/minio-go/v7"
@@ -32,7 +34,13 @@ func fetchImage(objetKey string) {
 	}
 	r, w := io.Pipe()
 	go cropImage(img, w)
-	saveImage(objetKey, r)
+	err = saveImage(objetKey, r)
+	if err != nil {
+		panic(err)
+	}
+	time.Sleep(time.Second)
+	res, err := s3.Client.StatObject(context.Background(), "test-img-thumbnail", objetKey, minio.StatObjectOptions{})
+	fmt.Printf("%+v\n", res.Size)
 	imageStatus.CompleteProcess()
 }
 
@@ -42,6 +50,7 @@ func cropImage(img image.Image, destWriter *io.PipeWriter) {
 	destWriter.Close()
 }
 
-func saveImage(name string, r io.Reader) {
-	s3.Client.PutObject(context.Background(), "test-img-thumbnail", name, r, -1, minio.PutObjectOptions{})
+func saveImage(name string, r io.Reader) (err error) {
+	_, err = s3.Client.PutObject(context.Background(), "test-img-thumbnail", name, r, -1, minio.PutObjectOptions{})
+	return err
 }

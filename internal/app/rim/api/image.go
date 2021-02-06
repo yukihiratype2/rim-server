@@ -16,7 +16,7 @@ import (
 func imageRoute() {
 	r.GET("/image", queryImages)
 	r.GET("/image/:id", getImage)
-	// r.GET("/imageprocess/:fileId", WaitForImageProcessed)
+	r.GET("/imageprocess/:fileId", waitForImageProcessed)
 	r.PUT("image", addImage)
 }
 
@@ -73,7 +73,7 @@ func addImage(c *gin.Context) {
 }
 
 func waitForImageProcessed(c *gin.Context) {
-	fileID := c.Param("fileID")
+	fileID := c.Param("fileId")
 	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: fileID}}
 	imageStatus.WaitForImageProcessed()
 	c.JSON(200, gin.H{
