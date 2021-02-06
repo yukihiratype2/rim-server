@@ -4,6 +4,8 @@ import (
 	"context"
 	"image"
 	"io"
+	"rim-server/internal/app/rim/event"
+	"rim-server/internal/app/rim/model"
 	"rim-server/internal/app/rim/s3"
 
 	"github.com/disintegration/imaging"
@@ -21,6 +23,8 @@ func Start() {
 }
 
 func fetchImage(objetKey string) {
+	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: objetKey}}
+	imageStatus.StartProcess()
 	object, err := s3.Client.GetObject(context.Background(), "test-img", objetKey, minio.GetObjectOptions{})
 	img, err := imaging.Decode(object)
 	if err != nil {
@@ -29,6 +33,7 @@ func fetchImage(objetKey string) {
 	r, w := io.Pipe()
 	go cropImage(img, w)
 	saveImage(objetKey, r)
+	imageStatus.CompleteProcess()
 }
 
 func cropImage(img image.Image, destWriter *io.PipeWriter) {

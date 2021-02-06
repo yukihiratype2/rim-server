@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/url"
+	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
 	"rim-server/internal/app/rim/s3"
 	"strconv"
@@ -15,7 +16,7 @@ import (
 func imageRoute() {
 	r.GET("/image", queryImages)
 	r.GET("/image/:id", getImage)
-	// r.GET("/image/process/:fileId", waitForImageProcessed)
+	// r.GET("/imageprocess/:fileId", WaitForImageProcessed)
 	r.PUT("image", addImage)
 }
 
@@ -62,6 +63,8 @@ func addImage(c *gin.Context) {
 	respImage.FileID = image.FileID
 
 	presignedURL, err := s3.Client.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
+	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: image.FileID}}
+	imageStatus.ImageCreated()
 	respImage.UploadURL = presignedURL.String()
 	if err != nil {
 		c.Err()
@@ -70,5 +73,10 @@ func addImage(c *gin.Context) {
 }
 
 func waitForImageProcessed(c *gin.Context) {
-	// fileId, err := strconv.ParseUint(c.Param("fileId"), 10, 8)
+	fileID := c.Param("fileID")
+	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: fileID}}
+	imageStatus.WaitForImageProcessed()
+	c.JSON(200, gin.H{
+		"status": "completed",
+	})
 }
