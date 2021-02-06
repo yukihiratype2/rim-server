@@ -8,7 +8,6 @@ import (
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
 	"rim-server/internal/app/rim/s3"
-	"time"
 
 	"github.com/disintegration/imaging"
 	"github.com/minio/minio-go/v7"
@@ -38,14 +37,21 @@ func fetchImage(objetKey string) {
 	if err != nil {
 		panic(err)
 	}
-	time.Sleep(time.Second)
 	res, err := s3.Client.StatObject(context.Background(), "test-img-thumbnail", objetKey, minio.StatObjectOptions{})
 	fmt.Printf("%+v\n", res.Size)
 	imageStatus.CompleteProcess()
 }
 
 func cropImage(img image.Image, destWriter *io.PipeWriter) {
-	result := imaging.Resize(img, 128, 128, imaging.Lanczos)
+	min := func(a, b int) int {
+		if a < b {
+			return a
+		}
+		return b
+	}
+	size := min(img.Bounds().Max.X, img.Bounds().Max.Y)
+	croped := imaging.CropCenter(img, size, size)
+	result := imaging.Resize(croped, 400, 400, imaging.Lanczos)
 	imaging.Encode(destWriter, result, imaging.JPEG)
 	destWriter.Close()
 }
