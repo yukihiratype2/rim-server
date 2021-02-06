@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
@@ -10,20 +11,24 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
 )
 
 func imageRoute() {
 	r.GET("/image", queryImages)
 	r.GET("/image/:id", getImage)
+	r.POST("image", updateImage)
 	r.GET("/imageprocess/:fileId", waitForImageProcessed)
 	r.PUT("image", addImage)
 }
 
 func queryImages(c *gin.Context) {
+	var query model.Image
+	c.ShouldBindQuery(&query)
 	var images []model.Image
 
-	model.Find(&images)
+	query.Find(&images)
 
 	c.JSON(200, images)
 }
@@ -70,6 +75,14 @@ func addImage(c *gin.Context) {
 		c.Err()
 	}
 	c.JSON(200, respImage)
+}
+
+func updateImage(c *gin.Context) {
+	var image model.Image
+	c.MustBindWith(&image, binding.JSON)
+	fmt.Printf("%+v\n", image)
+	image.Update()
+	c.JSON(200, image)
 }
 
 func waitForImageProcessed(c *gin.Context) {
