@@ -8,9 +8,10 @@ type Image struct {
 	Name   string `json:"name" form:"name"`
 	FileID string `json:"fileId"`
 	// Folder   Folder `json:"folder"`
-	Favorite bool   `json:"favorite" form:"favorite"`
-	URL      string `gorm:"-" json:"url"`
-	Tags     []*Tag `gorm:"many2many:image_tags;" json:"tag"`
+	Favorite        bool   `json:"favorite" form:"favorite"`
+	URL             string `gorm:"-" json:"url"`
+	Tags            []*Tag `gorm:"many2many:image_tags;" json:"tag"`
+	ProcessComplete bool   `json:"processComplete"`
 }
 
 func (i *Image) Create() (err error) {
@@ -18,10 +19,11 @@ func (i *Image) Create() (err error) {
 }
 
 func (i *Image) First() (err error) {
-	return db.Preload("Tags").First(i).Error
+	return db.Preload("Tags").Where(i).First(i).Error
 }
 
 func (i *Image) Find(images *[]Image) (err error) {
+	// i.ProcessComplete = true
 	return db.Where(i).Find(images).Error
 }
 

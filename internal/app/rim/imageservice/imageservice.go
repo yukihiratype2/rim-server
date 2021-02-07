@@ -24,6 +24,9 @@ func Start() {
 }
 
 func fetchImage(objetKey string) {
+	image := model.Image{FileID: objetKey}
+	image.First()
+	fmt.Println(image)
 	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: objetKey}}
 	imageStatus.StartProcess()
 	object, err := s3.Client.GetObject(context.Background(), "test-img", objetKey, minio.GetObjectOptions{})
@@ -37,8 +40,8 @@ func fetchImage(objetKey string) {
 	if err != nil {
 		panic(err)
 	}
-	res, err := s3.Client.StatObject(context.Background(), "test-img-thumbnail", objetKey, minio.StatObjectOptions{})
-	fmt.Printf("%+v\n", res.Size)
+	image.ProcessComplete = true
+	image.Update()
 	imageStatus.CompleteProcess()
 }
 
