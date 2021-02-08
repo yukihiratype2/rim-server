@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
@@ -59,13 +58,11 @@ type addImageResponse struct {
 }
 
 func addImage(c *gin.Context) {
-	var image addImageParam
+	var image model.Image
 	c.ShouldBindJSON(&image)
 	image.FileID = uuid.New().String() + ".jpg"
 	image.Create()
-	var respImage addImageResponse
-	respImage.ID = image.ID
-	respImage.FileID = image.FileID
+	respImage := addImageResponse{Image: image}
 
 	presignedURL, err := s3.Client.PresignedPutObject(context.Background(), "test-img", image.FileID, time.Second*3*60)
 	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: image.FileID}}
@@ -80,7 +77,6 @@ func addImage(c *gin.Context) {
 func updateImage(c *gin.Context) {
 	var image model.Image
 	c.MustBindWith(&image, binding.JSON)
-	fmt.Printf("%+v\n", image)
 	image.Update()
 	c.JSON(200, image)
 }

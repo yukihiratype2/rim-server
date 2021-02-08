@@ -1,17 +1,19 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 // Image Struct
 type Image struct {
 	gorm.Model
-	Name   string `json:"name" form:"name"`
-	FileID string `json:"fileId"`
-	// Folder   Folder `json:"folder"`
+	Name            string `json:"name" form:"name"`
+	FileID          string `json:"fileId"`
+	FolderID        int    `json:"folderId" form:"folderId"`
 	Favorite        bool   `json:"favorite" form:"favorite"`
 	URL             string `gorm:"-" json:"url"`
 	Tags            []*Tag `gorm:"many2many:image_tags;" json:"tag"`
-	ProcessComplete bool   `json:"processComplete"`
+	ProcessComplete bool   `json:"-"`
 }
 
 func (i *Image) Create() (err error) {
@@ -23,7 +25,7 @@ func (i *Image) First() (err error) {
 }
 
 func (i *Image) Find(images *[]Image) (err error) {
-	// i.ProcessComplete = true
+	i.ProcessComplete = true
 	return db.Where(i).Find(images).Error
 }
 

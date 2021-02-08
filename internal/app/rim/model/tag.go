@@ -8,3 +8,15 @@ type Tag struct {
 	Images []*Image `gorm:"many2many:image_tags;" json:"images"`
 	// gorm.Model
 }
+
+func (t Tag) Create() (err error) {
+	return db.Create(t).Error
+}
+
+func (t Tag) Update() (err error) {
+	return db.Save(t).Error
+}
+
+func (t Tag) Delete() (err error) {
+	return db.Delete(t).Error
+}

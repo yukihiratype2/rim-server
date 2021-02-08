@@ -11,6 +11,9 @@ import (
 func main() {
 	var err error
 	err = model.Connect()
+	if err != nil {
+		panic(err)
+	}
 	err = s3.Connect()
 	event.Start()
 	if err != nil {
