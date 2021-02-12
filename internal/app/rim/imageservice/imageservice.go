@@ -2,7 +2,6 @@ package imageservice
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"io"
 	"rim-server/internal/app/rim/event"
@@ -26,7 +25,6 @@ func Start() {
 func fetchImage(objetKey string) {
 	image := model.Image{FileID: objetKey}
 	image.First()
-	fmt.Println(image)
 	imageStatus := event.ImageProcessStatus{Image: model.Image{FileID: objetKey}}
 	imageStatus.StartProcess()
 	object, err := s3.Client.GetObject(context.Background(), "test-img", objetKey, minio.GetObjectOptions{})

@@ -10,7 +10,7 @@ type Image struct {
 	Name            string `json:"name" form:"name"`
 	FileID          string `json:"fileId"`
 	FolderID        int    `json:"folderId" form:"folderId"`
-	Favorite        bool   `json:"favorite" form:"favorite"`
+	Favorite        *bool  `json:"favorite,omitempty" form:"favorite"`
 	URL             string `gorm:"-" json:"url"`
 	Tags            []*Tag `gorm:"many2many:image_tags;" json:"tag"`
 	ProcessComplete bool   `json:"-"`
@@ -30,5 +30,5 @@ func (i *Image) Find(images *[]Image) (err error) {
 }
 
 func (i *Image) Update() (err error) {
-	return db.Save(i).Error
+	return db.Updates(i).Error
 }

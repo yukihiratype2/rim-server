@@ -47,11 +47,6 @@ func getImage(c *gin.Context) {
 	c.JSON(200, image)
 }
 
-type addImageParam struct {
-	model.Image
-	Immediate bool `json:"immediate" gorm:"-"`
-}
-
 type addImageResponse struct {
 	model.Image
 	UploadURL string `json:"uploadUrl" gorm:"-"`
