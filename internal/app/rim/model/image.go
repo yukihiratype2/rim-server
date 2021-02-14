@@ -9,10 +9,10 @@ type Image struct {
 	gorm.Model
 	Name            string `json:"name" form:"name"`
 	FileID          string `json:"fileId"`
-	FolderID        int    `json:"folderId" form:"folderId"`
+	FolderID        uint   `json:"folderId" form:"folderId"`
 	Favorite        *bool  `json:"favorite,omitempty" form:"favorite"`
 	URL             string `gorm:"-" json:"url"`
-	Tags            []*Tag `gorm:"many2many:image_tags;" json:"tag"`
+	Tags            []*Tag `gorm:"many2many:image_tags;" json:"tag" form:"tag"`
 	ProcessComplete bool   `json:"-"`
 }
 
@@ -26,7 +26,7 @@ func (i *Image) First() (err error) {
 
 func (i *Image) Find(images *[]Image) (err error) {
 	i.ProcessComplete = true
-	return db.Where(i).Find(images).Error
+	return db.Preload("Tags").Where(i).Find(images).Error
 }
 
 func (i *Image) Update() (err error) {

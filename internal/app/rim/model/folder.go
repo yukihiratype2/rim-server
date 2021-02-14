@@ -6,8 +6,8 @@ import (
 
 type Folder struct {
 	gorm.Model
-	Label string `json:"label"`
-	// Images []Image
+	Label  string `json:"label"`
+	Images []Image
 }
 
 func (f *Folder) Create() (err error) {

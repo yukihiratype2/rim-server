@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
@@ -25,6 +26,7 @@ func imageRoute() {
 func queryImages(c *gin.Context) {
 	var query model.Image
 	c.ShouldBindQuery(&query)
+	fmt.Printf("%+v\n", query)
 	var images []model.Image
 
 	query.Find(&images)
