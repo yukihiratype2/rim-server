@@ -18,7 +18,8 @@ func TestSaveImage(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Equal(t, image.Favorite, false)
-	image.Favorite = true
+	f := true
+	image.Favorite = &f
 	err = image.Update()
 	if err != nil {
 		t.Error(err)

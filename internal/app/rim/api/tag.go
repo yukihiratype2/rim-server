@@ -1,34 +1,34 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"rim-server/internal/app/rim/model"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
-func queryTags(w http.ResponseWriter, req *http.Request) {
-	var tag []model.Tag
-
-	// s.model.DB.Preload("Images").Find(&tag)
-
-	result, err := json.Marshal(tag)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(result)
+func tagRoute() {
+	r.GET("/tag", queryTags)
+	r.PUT("/tag", addTag)
 }
 
-func addTag(w http.ResponseWriter, req *http.Request) {
+func queryTags(c *gin.Context) {
 	var tag model.Tag
+	c.ShouldBindQuery(&tag)
+	var tags []model.Tag
+	tag.Find(&tags)
+	c.JSON(http.StatusOK, tags)
+	// s.model.DB.Preload("Images").Find(&tag)
+}
 
-	err := json.NewDecoder(req.Body).Decode(&tag)
-
-	// s.model.DB.Create(&tag)
-	res, err := json.Marshal(tag)
+func addTag(c *gin.Context) {
+	var tag model.Tag
+	err := c.MustBindWith(&tag, binding.JSON)
+	err = tag.Create()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		c.Err()
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(res)
+	c.JSON(http.StatusOK, tag)
+	// s.model.DB.Create(&tag)
 }

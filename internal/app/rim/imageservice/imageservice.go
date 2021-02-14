@@ -2,12 +2,14 @@ package imageservice
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"io"
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
 	"rim-server/internal/app/rim/s3"
 
+	"github.com/EdlinOrg/prominentcolor"
 	"github.com/disintegration/imaging"
 	"github.com/minio/minio-go/v7"
 )
@@ -34,6 +36,7 @@ func fetchImage(objetKey string) {
 	}
 	r, w := io.Pipe()
 	go cropImage(img, w)
+	findProminentColor(img)
 	err = saveImage(objetKey, r)
 	if err != nil {
 		panic(err)
@@ -55,6 +58,14 @@ func cropImage(img image.Image, destWriter *io.PipeWriter) {
 	result := imaging.Resize(croped, 400, 400, imaging.Lanczos)
 	imaging.Encode(destWriter, result, imaging.JPEG)
 	destWriter.Close()
+}
+
+func findProminentColor(img image.Image) {
+	colors, err := prominentcolor.Kmeans(img)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v\n", colors)
 }
 
 func saveImage(name string, r io.Reader) (err error) {

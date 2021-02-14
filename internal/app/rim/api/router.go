@@ -3,6 +3,7 @@ package api
 func setupRouter() {
 	imageRoute()
 	folderRoute()
+	tagRoute()
 	// r.HandleFunc("/tag", func(w http.ResponseWriter, r *http.Request) {
 	// 	setupResponse(&w, r)
 	// 	switch r.Method {
