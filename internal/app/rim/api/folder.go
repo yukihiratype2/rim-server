@@ -23,8 +23,14 @@ func queryFolder(c *gin.Context) {
 
 func addFolder(c *gin.Context) {
 	var folder model.Folder
-	c.MustBindWith(&folder, binding.JSON)
-	folder.Create()
+
+	if err := c.MustBindWith(&folder, binding.JSON); err != nil {
+		return
+	}
+
+	if err := folder.Create(); err != nil {
+		return
+	}
 	c.JSON(200, folder)
 }
 

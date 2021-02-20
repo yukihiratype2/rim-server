@@ -1,12 +1,13 @@
 package model
 
+import "gorm.io/gorm"
+
 // Tag Struct
 type Tag struct {
-	ID     uint     `gorm:"primarykey" json:"ID"`
+	gorm.Model
 	Label  string   `json:"label"`
 	Color  string   `json:"color"`
 	Images []*Image `gorm:"many2many:image_tags;" json:"images"`
-	// gorm.Model
 }
 
 func (t *Tag) Find(tags *[]Tag) (err error) {

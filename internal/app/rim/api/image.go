@@ -23,13 +23,29 @@ func imageRoute() {
 	r.PUT("image", addImage)
 }
 
+type queryImageParams struct {
+	Name     string   `form:"name"`
+	Color    string   `form:"color"`
+	Favorite *bool    `form:"favorite"`
+	Tags     []string `form:"tags[]"`
+	FolderID uint     `form:"folderId"`
+}
+
 func queryImages(c *gin.Context) {
-	var query model.Image
+	var query queryImageParams
 	c.ShouldBindQuery(&query)
-	fmt.Printf("%+v\n", query)
+	image := model.Image{
+		Name:     query.Name,
+		Favorite: query.Favorite,
+		FolderID: query.FolderID,
+		Tags:     []*model.Tag{},
+	}
+	for _, tag := range query.Tags {
+		image.Tags = append(image.Tags, &model.Tag{Label: tag})
+	}
 	var images []model.Image
 
-	query.Find(&images)
+	image.Find(&images)
 
 	c.JSON(200, images)
 }
@@ -37,13 +53,16 @@ func queryImages(c *gin.Context) {
 func getImage(c *gin.Context) {
 	var image model.Image
 	ID, err := strconv.ParseUint(c.Param("id"), 10, 8)
+	if err != nil {
+		return
+	}
 	image.ID = uint(ID)
 	image.First()
 	presignedURL, err := s3.Client.PresignedGetObject(context.Background(), "test-img", image.FileID, time.Second*24*60*60, url.Values{})
 	image.URL = presignedURL.String()
 
 	if err != nil {
-		c.Err()
+		return
 	}
 
 	c.JSON(200, image)
@@ -73,7 +92,10 @@ func addImage(c *gin.Context) {
 
 func updateImage(c *gin.Context) {
 	var image model.Image
-	c.MustBindWith(&image, binding.JSON)
+	if err := c.MustBindWith(&image, binding.JSON); err != nil {
+		return
+	}
+	fmt.Printf("%+v\n", image)
 	image.Update()
 	c.JSON(200, image)
 }

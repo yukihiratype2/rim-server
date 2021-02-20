@@ -15,9 +15,15 @@ func tagRoute() {
 
 func queryTags(c *gin.Context) {
 	var tag model.Tag
-	c.ShouldBindQuery(&tag)
+	err := c.ShouldBindQuery(&tag)
+	if err != nil {
+		c.Error(err)
+	}
 	var tags []model.Tag
-	tag.Find(&tags)
+	err = tag.Find(&tags)
+	if err != nil {
+		c.Error(err)
+	}
 	c.JSON(http.StatusOK, tags)
 	// s.model.DB.Preload("Images").Find(&tag)
 }
@@ -25,10 +31,12 @@ func queryTags(c *gin.Context) {
 func addTag(c *gin.Context) {
 	var tag model.Tag
 	err := c.MustBindWith(&tag, binding.JSON)
+	if err != nil {
+		return
+	}
 	err = tag.Create()
 	if err != nil {
-		c.Err()
+		return
 	}
 	c.JSON(http.StatusOK, tag)
-	// s.model.DB.Create(&tag)
 }
