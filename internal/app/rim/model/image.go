@@ -14,10 +14,14 @@ type Image struct {
 	URL             string `gorm:"-" json:"url,omitempty"`
 	Tags            []*Tag `gorm:"many2many:image_tags;" json:"tags,omitempty" form:"tags"`
 	ProcessComplete bool   `json:"-"`
+	Deleted         *bool  `json:"deleted"`
 }
 
 // Create image
 func (i *Image) Create() (err error) {
+	if i.FolderID == 0 {
+		i.FolderID = 1
+	}
 	return db.Create(i).Error
 }
 

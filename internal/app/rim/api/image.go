@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"rim-server/internal/app/rim/event"
 	"rim-server/internal/app/rim/model"
@@ -95,7 +94,6 @@ func updateImage(c *gin.Context) {
 	if err := c.MustBindWith(&image, binding.JSON); err != nil {
 		return
 	}
-	fmt.Printf("%+v\n", image)
 	image.Update()
 	c.JSON(200, image)
 }
