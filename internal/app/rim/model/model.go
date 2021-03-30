@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -8,7 +9,7 @@ import (
 var db *gorm.DB
 
 func Connect() (err error) {
-	dsn := "host=localhost user=natsuki dbname=natsuki port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := viper.GetString("dsn")
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)

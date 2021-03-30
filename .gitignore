@@ -2,3 +2,4 @@ temp.db
 tmp
 bin
 */**/*.test
+config.yaml
